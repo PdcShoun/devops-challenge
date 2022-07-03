@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  nodejs:
+    build:
+      context: .
+    image: nodejs
+    container_name: nodejs
+    restart: unless-stopped
+    networks:
+      - app-network
+    depends_on:
+      - redis
+    ports:
+      - '3064:3064'
+
+  redis:
+    image: 'redis:alpine'
+    ports:
+      - '6379:6379'
+    networks:
+      - app-network
+
+  webserver:
+    image: nginx:mainline-alpine
+    container_name: webserver
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+    depends_on:
+      - nodejs
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
